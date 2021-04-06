@@ -58,19 +58,20 @@ let find_q_ns = find_q find_ns
 (** Typing types *)
 
 (* specification types *)
-let rec ty_of_pty ns = function
+let rec ty_of_pty ns tvars = function
   | PTtyvar {pid_str;_} ->
      (* CHECK following what's done in why3, attributes are ignored*)
-     {ty_node = Tyvar (tv_of_string pid_str)}
+     {ty_node = Tyvar (try Mstr.find pid_str tvars
+                       with Not_found -> tv_of_string pid_str)}
   | PTtyapp (q,ptyl) ->
      let ts = find_q_ts ns q in
-     ty_app ts (List.map (ty_of_pty ns) ptyl)
+     ty_app ts (List.map (ty_of_pty ns tvars) ptyl)
   | PTtuple ptyl ->
-     let tyl = List.map (ty_of_pty ns) ptyl in
+     let tyl = List.map (ty_of_pty ns tvars) ptyl in
      let ts = ts_tuple (List.length tyl) in
      ty_app ts tyl
   | PTarrow (_,pty1,pty2) ->
-     let ty1, ty2 = ty_of_pty ns pty1, ty_of_pty ns pty2 in
+     let ty1, ty2 = ty_of_pty ns tvars pty1, ty_of_pty ns tvars pty2 in
      ty_app ts_arrow [ty1;ty2]
 
 (* OCaml types *)
@@ -100,10 +101,11 @@ open Dterm
 open Tterm
 open Tast
 
-let dty_of_pty ns dty = dty_of_ty (ty_of_pty ns dty)
+let dty_of_pty ns dty = dty_of_ty (ty_of_pty ns Mstr.empty dty)
 
 exception EmptyRecord
 exception BadRecordField of lsymbol
+exception NotRecordField of lsymbol
 exception DuplicateRecordField of lsymbol
 exception RecordFieldMissing of lsymbol
 
@@ -250,6 +252,16 @@ let rec dterm kid crcm ns denv {term_desc;term_loc=loc}: dterm =
      let node,dty = DTapp (ls,[]), dty in
      mk_dterm node dty
   | Uast.Tidapp (q,tl) -> qualid_app q tl
+  | Uast.Tfield (t, f) ->
+      let ls = find_q_ls ns f in
+      let dty1, dty = match specialize_ls ls with
+          | [dty1], dty when ls.ls_field ->
+              dty1, dty
+          | _ ->
+              error ~loc (NotRecordField ls) in
+      let dt = dterm kid crcm ns denv t in
+      dty_unify (dty_of_dterm dt) dty1;
+      mk_dterm (DTfield (dt, ls)) dty
   | Uast.Tapply  (t1,t2) ->
      unfold_app t1 t2 []
   | Uast.Tnot t ->
@@ -390,9 +402,14 @@ let mutable_flag = function
   | Asttypes.Immutable -> Immutable
 
 let process_type_spec kid crcm ns ty spec =
+  let tvars = match ty.ty_node with
+    | Tyapp (ts, _) ->
+        List.fold_left (fun tvars tv -> Mstr.add tv.tv_name.id_str tv tvars)
+         Mstr.empty ts.ts_args
+    | Tyvar _ -> assert false in
   let field (ns,fields) f =
-    let f_ty = ty_of_pty ns f.f_pty in
-    let ls = fsymbol (Ident.of_preid f.f_preid) [ty] f_ty in
+    let f_ty = ty_of_pty ns tvars f.f_pty in
+    let ls = fsymbol ~field:true (Ident.of_preid f.f_preid) [ty] f_ty in
     let ls_inv = fsymbol (Ident.of_preid f.f_preid) [] f_ty in
     (ns_add_ls ns f.f_preid.pid_str ls_inv, (ls, f.f_mutable)::fields) in
   let (ns,fields) = List.fold_left field (ns,[]) spec.ty_field in
@@ -472,7 +489,7 @@ let type_type_declaration kid crcm ns tdl =
       let mk_ld ld =
         let id = Ident.create ld.pld_name.txt in
         let ty_res = parse_core alias tvl ld.pld_type in
-        let field = fsymbol id [ty] ty_res in
+        let field = fsymbol ~field:true id [ty] ty_res in
         let mut = mutable_flag ld.pld_mutable in
         label_declaration field mut ld.pld_loc ld.pld_attributes in
       {rd_cs;rd_ldl = List.map mk_ld ldl}
@@ -573,7 +590,7 @@ let process_val_spec kid crcm ns id cty vs =
     | [], [] -> env, List.rev lal
     | [], _ -> error_report ~loc:(vs.sp_hd_nm.pid_loc) "too few parameters"
     | Uast.Lghost (pid,pty) :: args, _ ->
-       let ty = ty_of_pty ns pty in
+       let ty = ty_of_pty ns Mstr.empty pty in (* FIXME? *)
        let vs = create_vsymbol pid ty in
        let env, lal = add_arg (Lghost vs) env lal in
        process_args args tyl env lal
@@ -675,10 +692,10 @@ let process_val ~loc ?(ghost=false) kid crcm ns vd =
 (* Currently checking:
    1 - arguments have different names *)
 let process_function kid crcm ns f =
-  let f_ty = Option.map (ty_of_pty ns) f.fun_type in
+  let f_ty = Option.map (ty_of_pty ns Mstr.empty) f.fun_type in
 
   let params = List.map (fun (_,pid,pty) ->
-    create_vsymbol pid (ty_of_pty ns pty)) f.fun_params in
+    create_vsymbol pid (ty_of_pty ns Mstr.empty pty)) f.fun_params in
   let tyl = List.map (fun vs -> vs.vs_ty) params in
 
   let ls = lsymbol (Ident.of_preid f.fun_name) tyl f_ty in
@@ -970,6 +987,9 @@ let () =
       | BadRecordField ls ->
         Fmt.kstr (fun str -> Some (make ~loc:Location.none ~sub:[] str))
           "The record field %a does not exist" print_ls_nm ls
+      | NotRecordField ls ->
+        Fmt.kstr (fun str -> Some (make ~loc:Location.none ~sub:[] str))
+          "%a is not a record field" print_ls_nm ls
       | DuplicateRecordField ls ->
         Fmt.kstr (fun str -> Some (make ~loc:Location.none ~sub:[] str))
           "Duplicated record field %a" print_ls_nm ls

@@ -105,6 +105,7 @@ and dterm_node =
   | DTvar   of Preid.t
   | DTconst of Parsetree.constant
   | DTapp   of lsymbol * dterm list
+  | DTfield of dterm * lsymbol
   | DTif    of dterm * dterm * dterm
   | DTlet   of Preid.t * dterm * dterm
   | DTcase  of dterm * (dpattern * dterm) list
@@ -146,8 +147,8 @@ let rec unify_dty_ty dty ty = match head dty, ty.ty_node with
 let rec unify dty1 dty2 = match head dty1, head dty2 with
   | Tvar {dtv_id=id1}, Tvar {dtv_id=id2} when id1 = id2 -> ()
   | Tvar tvar, dty | dty, Tvar tvar ->
-     if occur tvar.dtv_id dty then raise Exit else
-       tvar.dtv_def <- Some dty
+     if occur tvar.dtv_id dty then raise Exit;
+     tvar.dtv_def <- Some dty
   | Tapp (ts1,dtyl1), Tapp (ts2,dtyl2) when ts_equal ts1 ts2 -> begin
       try List.iter2 unify dtyl1 dtyl2 with
         Invalid_argument _ -> raise Exit end
@@ -365,6 +366,8 @@ and term_node ?loc env prop dty dterm_node =
      else t_equ (term env false dt1) (term env false dt2)
   | DTapp (ls,dtl) ->
      t_app ls (List.map (term env false) dtl) (Option.map ty_of_dty dty)
+  | DTfield (t, ls) ->
+     t_field (term env false t) ls
   | DTif (dt1,dt2,dt3) ->
      let prop = prop || dty = None in
      t_if (term env true dt1) (term env prop dt2) (term env prop dt3)
