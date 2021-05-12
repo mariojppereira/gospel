@@ -15,7 +15,7 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Example Tools" href="tools.html" />
+    <link rel="next" title="Language Specification" href="language.html" />
     <link rel="prev" title="Welcome to Gospel’s documentation!" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -62,13 +62,46 @@ be deduced from the definition of type <cite>‘a t</cite> alone.</p>
 <p>Let us now declare and specify a <cite>push</cite> operation for the queue data
 structure. First, we write the OCaml type (function signature) then the Gospel
 specification, as follows:</p>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span>
+<span class="c">(*@ mutable model view: &#39;a seq *)</span>
+
+<span class="k">val</span> <span class="n">create</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span>
+<span class="c">(** Return a new queue, initially empty. *)</span>
+<span class="c">(*@ q = create ()</span>
+<span class="c">      ensures q.view = empty *)</span>
+
+<span class="k">val</span> <span class="n">push</span> <span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
+<span class="c">(** [add x q] adds the element [x] at the end of the queue [q]. *)</span>
+<span class="c">(*@ push x q</span>
+<span class="c">      modifies q</span>
+<span class="c">      ensures  q.view = snoc (old q.view) x *)</span>
+
+<span class="k">val</span> <span class="n">pop</span> <span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span>
+<span class="c">(** [pop q] removes and returns the first element in queue [q]. *)</span>
+<span class="c">(*@ r = pop q</span>
+<span class="c">      checks   q.view &lt;&gt; empty</span>
+<span class="c">      modifies q</span>
+<span class="c">      ensures  old q.view = cons r q.view *)</span>
+
+<span class="o">+</span> <span class="n">variant</span> <span class="k">with</span> <span class="n">raises</span>
+
+<span class="k">val</span> <span class="n">is_empty</span> <span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+<span class="c">(** Return [true] if the given queue is empty, [false] otherwise. *)</span>
+<span class="c">(*@ b = is_empty q</span>
+<span class="c">      ensures b &lt;-&gt; q.view = empty *)</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>show all the signature first, or at the end with Gospel spec?</p>
+</div>
 <div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">push</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
 <span class="c">(*@ push v q</span>
 <span class="c">    modifies q</span>
 <span class="c">    ensures  q.view = Seq.cons v (old q.view) *)</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="id2">
+<div class="admonition-todo admonition" id="id3">
 <p class="admonition-title">Todo</p>
 <p>should we use <cite>snoc</cite> or <cite>::</cite> ?</p>
 </div>
@@ -90,7 +123,7 @@ mutable field.</p>
 </pre></div>
 </div>
 <p>Foo</p>
-<div class="admonition-todo admonition" id="id3">
+<div class="admonition-todo admonition" id="id4">
 <p class="admonition-title">Todo</p>
 <p>to explain <cite>raises</cite>: clearly state q.view (implicitly?) refers to the
 pre-state</p>
@@ -100,11 +133,11 @@ pre-state</p>
 <span class="c">      ensures b &lt;-&gt; q.view = empty *)</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="id4">
+<div class="admonition-todo admonition" id="id5">
 <p class="admonition-title">Todo</p>
 <p><cite>is_empty</cite> is interesting because it is an effect-free function</p>
 </div>
-<div class="admonition-todo admonition" id="id5">
+<div class="admonition-todo admonition" id="id6">
 <p class="admonition-title">Todo</p>
 <p><cite>concat</cite>: should we show all the free variants? It could be interesting in
 order to showcase the expressiveness of Gospel to cope with different
@@ -112,7 +145,7 @@ programming scenarios.</p>
 </div>
 <div class="section" id="gospel-type-checker">
 <h2>Gospel type-checker<a class="headerlink" href="#gospel-type-checker" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id6">
+<div class="admonition-todo admonition" id="id7">
 <p class="admonition-title">Todo</p>
 <ul class="simple">
 <li><p>show how the type-checker works for this example</p></li>
@@ -125,7 +158,7 @@ programming scenarios.</p>
 <p>Cameleer is a tool for the deductive verification for OCaml code. It takes as
 input an OCaml programm, annotated with Gospel specification, and translates it
 into an equivalent WhyML counterpart.</p>
-<div class="admonition-todo admonition" id="id7">
+<div class="admonition-todo admonition" id="id8">
 <p class="admonition-title">Todo</p>
 <p>include a more comprehensive introduction to the Cameleer tool</p>
 </div>
@@ -141,7 +174,7 @@ its elements. We begin by declaring the following type definition:</p>
 <span class="c">                view = front ++ List.rev rear *)</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="id8">
+<div class="admonition-todo admonition" id="id9">
 <p class="admonition-title">Todo</p>
 <p>change the type of field <cite>view</cite> to a sequence</p>
 </div>
@@ -170,14 +203,14 @@ follows:</p>
 <span class="c">      ensures q.view = (old q.view) @ [x] *)</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="id9">
+<div class="admonition-todo admonition" id="id10">
 <p class="admonition-title">Todo</p>
 <p>change the <cite>push</cite> operation to follow the queue model of the FM’19 paper</p>
 </div>
 </div>
 <div class="section" id="ocaml-rtac">
 <h2>OCaml RTAC<a class="headerlink" href="#ocaml-rtac" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id10">
+<div class="admonition-todo admonition" id="id11">
 <p class="admonition-title">Todo</p>
 <p>use the ephemeral queue example to showcase Clément’s RTAC tool</p>
 </div>
@@ -208,9 +241,9 @@ follows:</p>
 <li class="toctree-l2"><a class="reference internal" href="#ocaml-rtac">OCaml RTAC</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tools.html">Example Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="language.html">Language Specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Gospel API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">Example Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="todos.html">Documentation TODOs</a></li>
 </ul>
@@ -220,7 +253,7 @@ follows:</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Welcome to Gospel’s documentation!</a></li>
-      <li>Next: <a href="tools.html" title="next chapter">Example Tools</a></li>
+      <li>Next: <a href="language.html" title="next chapter">Language Specification</a></li>
   </ul></li>
 </ul>
 </div>
