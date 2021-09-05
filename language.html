@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Language Specification &#8212; GOSPEL dev documentation</title>
+    <title>Language Specification &#8212; Gospel 0.1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -15,8 +15,8 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Gospel API" href="api.html" />
-    <link rel="prev" title="Starting Example" href="starting.html" />
+    <link rel="next" title="Standard library" href="stdlib.html" />
+    <link rel="prev" title="Walkthoughs" href="walkthrough.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -67,11 +67,11 @@ declaration:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="gospel-preprocessor-gospel-pps">
-<h3>Gospel preprocessor: <code class="docutils literal notranslate"><span class="pre">gospel_pps</span></code><a class="headerlink" href="#gospel-preprocessor-gospel-pps" title="Permalink to this headline">¶</a></h3>
-<p>Writing attributes can be tedious, especially when nested. Gospel is provided
-with a preprocessor that lets you write Gospel specifications in special
-comments, starting with a <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>:</p>
+<div class="section" id="gospel-preprocessor">
+<h3>Gospel preprocessor<a class="headerlink" href="#gospel-preprocessor" title="Permalink to this headline">¶</a></h3>
+<p>Writing attributes can be tedious, especially when nested. Gospel
+automatically applies a preprocessor that lets you write Gospel
+specifications in special comments, starting with a <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>:</p>
 <div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">f</span><span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span>           <span class="c">(* An OCaml value declaration *)</span>
 <span class="c">(*@ y = f x                 (* Its Gospel specification   *)</span>
 <span class="c">    ensures x &gt; 0 *)</span>
@@ -123,7 +123,7 @@ Gospel expression, be it a term or a formula.</p>
 <p class="rubric">Expressions</p>
 <p>A large fragment of the OCaml syntax is reused for Gospel expressions.</p>
 <pre>
-<strong id="grammar-token-expr">expr         </strong> ::=  <a class="reference internal" href="#grammar-token-constant"><code class="xref docutils literal notranslate"><span class="pre">constant</span></code></a>
+<strong id="grammar-token-ocaml-expr">ocaml_expr   </strong> ::=  <a class="reference internal" href="#grammar-token-constant"><code class="xref docutils literal notranslate"><span class="pre">constant</span></code></a>
                    | (<a class="reference internal" href="#grammar-token-upath"><code class="xref docutils literal notranslate"><span class="pre">upath</span></code></a> &quot;.&quot;)? <code class="xref docutils literal notranslate"><span class="pre">ident</span></code>
                    | &quot;(&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a> &quot;)&quot;
                    | &quot;(&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a> (&quot;,&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>)+ &quot;)&quot;
@@ -168,7 +168,7 @@ Gospel expression, be it a term or a formula.</p>
 <p class="rubric">Gospel-specific expressions</p>
 <p>In addition, there is syntax that is specific to Gospel.</p>
 <pre>
-<strong id="id1">expr      </strong> ::=  ...
+<strong id="grammar-token-expr">expr      </strong> ::=  <a class="reference internal" href="#grammar-token-ocaml-expr"><code class="xref docutils literal notranslate"><span class="pre">ocaml_expr</span></code></a>
                 | <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a> &quot;/\&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
                 | <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a> &quot;\/&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
                 | &quot;old&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
@@ -198,10 +198,6 @@ for instance, and it is interpreted as <code class="docutils literal notranslate
 </div>
 <div class="section" id="function-contracts">
 <h2>Function Contracts<a class="headerlink" href="#function-contracts" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>contracta for a constant e.g. val x: int (header needed? etc.)</p>
-</div>
 <p>An OCaml function is given a formal specification by appending one Gospel
 function contract to its declaration. Here is an example:</p>
 <div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">eucl_division</span><span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
@@ -214,10 +210,10 @@ function contract to its declaration. Here is an example:</p>
 <dl class="simple">
 <dt>Such a contract is composed of two parts:</dt><dd><ul class="simple">
 <li><p>The first line is the header of the contract; it names the function arguments
-and result. It is mandatory and must appear at the beginning of the contract.</p></li>
+and result. It must appear at the beginning of the contract.</p></li>
 <li><p>The next lines contain as many specification <cite>clauses</cite> as needed. Here we
 have three clauses: one <a class="reference internal" href="#preconditions"><span class="std std-ref">precondition</span></a> introduced with
-<code class="docutils literal notranslate"><span class="pre">requires</span></code>, and two <a class="reference internal" href="#postconditions"><span class="std std-ref">postconditions</span></a>” introduced with
+<code class="docutils literal notranslate"><span class="pre">requires</span></code>, and two <a class="reference internal" href="#postconditions"><span class="std std-ref">postconditions</span></a> introduced with
 <code class="docutils literal notranslate"><span class="pre">ensures</span></code>.</p></li>
 </ul>
 </dd>
@@ -235,16 +231,21 @@ have three clauses: one <a class="reference internal" href="#preconditions"><spa
 <strong id="grammar-token-ident-tuple">ident_tuple</strong> ::=  <code class="xref docutils literal notranslate"><span class="pre">identifier</span></code> (&quot;,&quot; <code class="xref docutils literal notranslate"><span class="pre">identifier</span></code>)*
 <strong id="grammar-token-parameter">parameter  </strong> ::=  &quot;()&quot; | <code class="xref docutils literal notranslate"><span class="pre">identifier</span></code> | &quot;~&quot; <code class="xref docutils literal notranslate"><span class="pre">identifier</span></code> | &quot;?&quot; <code class="xref docutils literal notranslate"><span class="pre">identifier</span></code>
 </pre>
-<div class="admonition-todo admonition" id="id3">
+<div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
 <p>ghost parameters and results</p>
+</div>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>contract for a constant e.g. val x: int ensures x &gt; 0</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>In the absence of a contract attached to a function declaration, <strong>no
 assumptions are made</strong> on the behaviour of the function.</p>
 <p>No preconditions or postconditions are to be verified, and the function may
-diverge, raise unlisted exceptions, or modify mutable types, etc.</p>
+diverge, raise unlisted exceptions, or modify mutable types, etc.
+However, it cannot break any <a class="reference internal" href="#invariants"><span class="std std-ref">type invariant</span></a>.</p>
 <p>One may still enable the implicit specification about exceptions,
 mutability, non-termination, etc. by creating a contract with no clause:</p>
 <div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">eucl_division</span><span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
@@ -268,10 +269,10 @@ as follows:</p>
 entry. They are used to describe requirements on the inputs of the
 function, but also possibly on a global state.</p>
 <p>They are denoted using the keyword <code class="docutils literal notranslate"><span class="pre">requires</span></code> or <code class="docutils literal notranslate"><span class="pre">checks</span></code>, followed by a
-<code class="xref std std-token docutils literal notranslate"><span class="pre">formula</span></code>:</p>
+<a class="reference internal" href="#grammar-token-expr"><code class="xref std std-token docutils literal notranslate"><span class="pre">expr</span></code></a>:</p>
 <pre>
-<strong id="grammar-token-precondition">precondition</strong> ::=  &quot;requires&quot; <code class="xref docutils literal notranslate"><span class="pre">formula</span></code>
-                  | &quot;checks&quot; <code class="xref docutils literal notranslate"><span class="pre">formula</span></code>
+<strong id="grammar-token-precondition">precondition</strong> ::=  &quot;requires&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
+                  | &quot;checks&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
 </pre>
 <p class="rubric"><code class="docutils literal notranslate"><span class="pre">requires</span></code></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">requires</span></code> clauses state the conditions for which the specified
@@ -320,7 +321,7 @@ verified as a conjunction, which means:</p>
 </div>
 <p>However, splitting the specification into several, smaller clauses
 leads to better readability and maintainability and is encouraged.</p>
-<div class="admonition-todo admonition" id="id4">
+<div class="admonition-todo admonition" id="id3">
 <p class="admonition-title">Todo</p>
 <p>what about requires+checks? does the order matter?</p>
 </div>
@@ -331,9 +332,9 @@ leads to better readability and maintainability and is encouraged.</p>
 function call. They are used to specify how the outputs of the function
 relate to its inputs, and how values were mutated, when applicable.</p>
 <p>Postconditions are denoted using the <code class="docutils literal notranslate"><span class="pre">ensures</span></code> keyword, followed by a
-<code class="xref std std-token docutils literal notranslate"><span class="pre">formula</span></code>:</p>
+<a class="reference internal" href="#grammar-token-expr"><code class="xref std std-token docutils literal notranslate"><span class="pre">expr</span></code></a>:</p>
 <pre>
-<strong id="grammar-token-postcondition">postcondition</strong> ::=  &quot;ensures&quot; <code class="xref docutils literal notranslate"><span class="pre">formula</span></code>
+<strong id="grammar-token-postcondition">postcondition</strong> ::=  &quot;ensures&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
 </pre>
 <p>As discussed in the <a class="reference internal" href="#preconditions"><span class="std std-ref">previous section</span></a>, the
 property expressed by the formula is expected to be verified after the
@@ -367,11 +368,11 @@ this exception must be listed, along with the properties that are verified in
 that case.</p>
 <p>These clauses are expressed with a <code class="docutils literal notranslate"><span class="pre">raises</span></code> keyword, followed by a
 list of <code class="xref std std-token docutils literal notranslate"><span class="pre">cases</span></code> associating each exception with its
-<code class="xref std std-token docutils literal notranslate"><span class="pre">formula</span></code>, with a syntax similar to OCaml’s pattern matching:</p>
+<a class="reference internal" href="#grammar-token-expr"><code class="xref std std-token docutils literal notranslate"><span class="pre">expr</span></code></a>, with a syntax similar to OCaml’s pattern matching:</p>
 <pre>
 <strong id="grammar-token-exceptional-postcondition">exceptional_postcondition</strong> ::=  &quot;raises&quot; <a class="reference internal" href="#grammar-token-exn-case"><code class="xref docutils literal notranslate"><span class="pre">exn_case</span></code></a> (&quot;|&quot; <a class="reference internal" href="#grammar-token-exn-case"><code class="xref docutils literal notranslate"><span class="pre">exn_case</span></code></a>)*
-<strong id="grammar-token-exn-case">exn_case                 </strong> ::=  <code class="xref docutils literal notranslate"><span class="pre">qualid</span></code> &quot;-&gt;&quot; <code class="xref docutils literal notranslate"><span class="pre">formula</span></code>
-                               | <code class="xref docutils literal notranslate"><span class="pre">qualid</span></code> <a class="reference internal" href="#grammar-token-pattern"><code class="xref docutils literal notranslate"><span class="pre">pattern</span></code></a> &quot;-&gt;&quot; <code class="xref docutils literal notranslate"><span class="pre">formula</span></code>
+<strong id="grammar-token-exn-case">exn_case                 </strong> ::=  <code class="xref docutils literal notranslate"><span class="pre">qualid</span></code> &quot;-&gt;&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
+                               | <code class="xref docutils literal notranslate"><span class="pre">qualid</span></code> <a class="reference internal" href="#grammar-token-pattern"><code class="xref docutils literal notranslate"><span class="pre">pattern</span></code></a> &quot;-&gt;&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
                                | <code class="xref docutils literal notranslate"><span class="pre">qualid</span></code>
 </pre>
 <p>Gospel expects each <code class="docutils literal notranslate"><span class="pre">raises</span></code> clause to perform an exhaustive pattern
@@ -444,7 +445,7 @@ be expressed in pure logic:</p>
 and the conversion of <code class="docutils literal notranslate"><span class="pre">t</span></code> to a list. This does not leak implementation
 details, as <code class="docutils literal notranslate"><span class="pre">iter</span></code> might in fact be implemented in a different, more
 efficient, way, it does however make the specification concise and elegant.</p>
-<div class="admonition-todo admonition" id="id5">
+<div class="admonition-todo admonition" id="id4">
 <p class="admonition-title">Todo</p>
 <p>Warn about the OCaml code not being parsed/type-checked at the moment
 (or do it).</p>
@@ -471,29 +472,87 @@ or not:</p>
 <span class="target" id="index-8"></span></div>
 <div class="section" id="effects">
 <span id="index-9"></span><h3>Effects<a class="headerlink" href="#effects" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id6">
+<div class="admonition-todo admonition" id="id5">
 <p class="admonition-title">Todo</p>
 <p>do it</p>
 </div>
-<div class="admonition-todo admonition" id="id7">
+<div class="admonition-todo admonition" id="id6">
 <p class="admonition-title">Todo</p>
 <p>when we have ensures+raises+modifies, the effect stated by
 modifies applies for both ensures and raises</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">modifies</span></code>…
 <code class="docutils literal notranslate"><span class="pre">consumes</span></code>…</p>
-<span class="target" id="index-10"></span><span class="target" id="index-11"></span><span class="target" id="index-12"></span></div>
+</div>
 </div>
 <div class="section" id="type-specification">
-<span id="index-13"></span><h2>Type Specification<a class="headerlink" href="#type-specification" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id8">
-<p class="admonition-title">Todo</p>
-<p>do it</p>
+<h2>Type Specification<a class="headerlink" href="#type-specification" title="Permalink to this headline">¶</a></h2>
+<p>Similarly to functions, OCaml types can also be annotated with Gospel
+specifications. Consider the following example of a container datastructure:</p>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span>
+<span class="c">(*@ model capacity: int</span>
+<span class="c">    mutable model contents: &#39;a Set.t</span>
+<span class="c">    invariant Set.cardinal contents &lt;= capacity *)</span>
+</pre></div>
 </div>
+<dl class="simple">
+<dt>The specification of this type contains three elements</dt><dd><ul class="simple">
+<li><p>the first two lines are <a class="reference internal" href="#models"><span class="std std-ref">models</span></a>. They represent the type <code class="docutils literal notranslate"><span class="pre">t</span></code>
+in the logical domain. <code class="docutils literal notranslate"><span class="pre">capacity</span></code> is an immutable model of type <code class="docutils literal notranslate"><span class="pre">int</span></code>
+representing the maximum length of the datastructure, and <code class="docutils literal notranslate"><span class="pre">contents</span></code> is a
+mutable set representing its contents. Note that <code class="docutils literal notranslate"><span class="pre">Set.t</span></code> references a
+logical set provided by Gospel standard library. Models do not give any
+information on the actual implementation of <code class="docutils literal notranslate"><span class="pre">t</span></code>.</p></li>
+<li><p>the last line is a clause denoting a type <a class="reference internal" href="#invariants"><span class="std std-ref">invariant</span></a>. At
+all times, values of type <code class="docutils literal notranslate"><span class="pre">t</span></code> should contain less elements that their
+maximum capacity.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Types specifications can contain the following constructs:</p>
+<pre>
+<strong id="grammar-token-type-contract">type_contract</strong> ::=  (<a class="reference internal" href="#grammar-token-model"><code class="xref docutils literal notranslate"><span class="pre">model</span></code></a> | &quot;ephemeral&quot; | <a class="reference internal" href="#grammar-token-invariant"><code class="xref docutils literal notranslate"><span class="pre">invariant</span></code></a>)*
+</pre>
+<span class="target" id="index-10"></span><div class="section" id="models">
+<span id="index-11"></span><h3>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h3>
+<p>Type models are logical projections of OCaml types. They help specify the type
+invariants and contents at several locations of the program, without actually
+exposing them and leaking implementations details. Their syntax is as follows:</p>
+<pre>
+<strong id="grammar-token-model">model</strong> ::=  &quot;mutable&quot;? &quot;model&quot; <code class="xref docutils literal notranslate"><span class="pre">identifier</span></code> &quot;:&quot; <a class="reference internal" href="#grammar-token-typexpr"><code class="xref docutils literal notranslate"><span class="pre">typexpr</span></code></a>
+</pre>
+<p>The keyword <code class="docutils literal notranslate"><span class="pre">model</span></code> is used to introduce a new model. It may be preceded by
+the keyword <code class="docutils literal notranslate"><span class="pre">mutable</span></code> to denote that the model may be mutated during the
+execution of the program, e.g. by a function call. It is then followed by a type
+annotated name for that model, in a fashion similar to OCaml’s record fields.</p>
+</div>
+<div class="section" id="mutable-types">
+<span id="index-12"></span><h3>Mutable types<a class="headerlink" href="#mutable-types" title="Permalink to this headline">¶</a></h3>
+<p>Gospel lets you specify when a type may contain some mutable state by using the
+keyword <code class="docutils literal notranslate"><span class="pre">ephemeral</span></code> in its annotation:</p>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="n">t</span>
+<span class="c">(*@ model capacity: int</span>
+<span class="c">    ephemeral *)</span>
+</pre></div>
+</div>
+<p>Of course, a type that has a mutable model is considered mutable, so the
+<code class="docutils literal notranslate"><span class="pre">ephemeral</span></code> may be omitted whenever at least one declared model is mutable.</p>
+</div>
+<div class="section" id="invariants">
+<span id="index-13"></span><h3>Invariants<a class="headerlink" href="#invariants" title="Permalink to this headline">¶</a></h3>
+<p>Type annotation may also contain invariants that hold at every entry and exit
+point of every fonction that manipulates their values. Formulae expressing these
+properties may be added after the <code class="docutils literal notranslate"><span class="pre">invariant</span></code> keyword:</p>
+<pre>
+<strong id="grammar-token-invariant">invariant</strong> ::=  &quot;invariant&quot; <a class="reference internal" href="#grammar-token-expr"><code class="xref docutils literal notranslate"><span class="pre">expr</span></code></a>
+</pre>
+<p>Note that function may break these invariants internally, but must restore them
+so that they still hold at the function exit.</p>
 <span class="target" id="index-14"></span><span class="target" id="index-15"></span><span class="target" id="index-16"></span></div>
+</div>
 <div class="section" id="ghost-and-logical-declarations">
 <span id="index-17"></span><h2>Ghost and Logical Declarations<a class="headerlink" href="#ghost-and-logical-declarations" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id9">
+<div class="admonition-todo admonition" id="id7">
 <p class="admonition-title">Todo</p>
 <p>do it</p>
 </div>
@@ -507,7 +566,7 @@ modifies applies for both ensures and raises</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">GOSPEL</a></h1>
+<h1 class="logo"><a href="index.html">Gospel</a></h1>
 
 
 
@@ -518,7 +577,8 @@ modifies applies for both ensures and raises</p>
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="starting.html">Starting Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="walkthrough.html">Walkthoughs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Language Specification</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#specification-locations">Specification locations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lexical-conventions">Lexical Conventions</a></li>
@@ -528,18 +588,18 @@ modifies applies for both ensures and raises</p>
 <li class="toctree-l2"><a class="reference internal" href="#ghost-and-logical-declarations">Ghost and Logical Declarations</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Gospel API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tools.html">Example Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stdlib.html">Standard library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publications.html">Related publications</a></li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
-<li class="toctree-l1"><a class="reference internal" href="todos.html">Documentation TODOs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="starting.html" title="previous chapter">Starting Example</a></li>
-      <li>Next: <a href="api.html" title="next chapter">Gospel API</a></li>
+      <li>Previous: <a href="walkthrough.html" title="previous chapter">Walkthoughs</a></li>
+      <li>Next: <a href="stdlib.html" title="next chapter">Standard library</a></li>
   </ul></li>
 </ul>
 </div>
@@ -566,7 +626,7 @@ modifies applies for both ensures and raises</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, VOCaL team.
+      &copy;2020—2021, Jean-Christophe Filliâtre, Clément Pascutto, Mário Pereira.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
