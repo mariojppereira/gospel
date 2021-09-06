@@ -50,7 +50,7 @@ how to get started with your OCaml environment.</p>
 </pre></div>
 </div>
 <p>This will install the <code class="docutils literal notranslate"><span class="pre">gospel</span></code> tool binary, as well as the developer library if you
-wish to build your software on top of Gospel. You may check the installation with</p>
+wish to build your software on top of Gospel. You may check the installation with:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ gospel --version
 gospel version <span class="m">0</span>.1.0
 </pre></div>
@@ -73,7 +73,7 @@ interface for polymorphic, limited capacity containers:</p>
 <span class="c">(** [is_empty t] is [true] iff [t] contains no elements. *)</span>
 
 <span class="k">val</span> <span class="n">clear</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
-<span class="c">(** [clear t] removes all values in [t]. *)</span><span class="o">*</span>
+<span class="c">(** [clear t] removes all values in [t]. *)</span>
 
 <span class="k">val</span> <span class="n">add</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
 <span class="c">(** [add t x] adds [x] to the container [t], or raises [Full] if</span>
@@ -169,7 +169,7 @@ helps up refer to the state of the container prior to the function execution:</p
 <span class="c">    modifies t.contents</span>
 <span class="c">    ensures t.contents = Set.add x (old t.contents) *)</span>
 
-<span class="k">val</span> <span class="n">remove</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
+<span class="k">val</span> <span class="n">remove</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
 <span class="c">(*@ remove t x</span>
 <span class="c">    modifies t.contents</span>
 <span class="c">    ensures t.contents = Set.remove x (old t.contents) *)</span>
