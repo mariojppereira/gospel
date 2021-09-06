@@ -37,8 +37,9 @@
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="installing-gospel">
 <h2>Installing Gospel<a class="headerlink" href="#installing-gospel" title="Permalink to this headline">¶</a></h2>
-<p>Please make sure that you already have a decently recent version <code class="docutils literal notranslate"><span class="pre">ocaml</span></code> and
-<code class="docutils literal notranslate"><span class="pre">opam</span></code> installed. Gospel requires the following versions:</p>
+<p>Please make sure that you already have a decently recent version of
+<code class="docutils literal notranslate"><span class="pre">ocaml</span></code> and <code class="docutils literal notranslate"><span class="pre">opam</span></code> installed. Gospel requires the following
+versions:</p>
 <ul class="simple">
 <li><p>OCaml 4.09.0 or newer</p></li>
 <li><p>Opam 2.0 or newer</p></li>
@@ -65,7 +66,7 @@ interface for polymorphic, limited capacity containers:</p>
 
 <span class="k">exception</span> <span class="nc">Full</span>
 
-<span class="k">val</span> <span class="n">create</span><span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">t</span>
+<span class="k">val</span> <span class="n">create</span><span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span>
 <span class="c">(** [create capacity] is an empty container which maximum capacity</span>
 <span class="c">    is [capacity]. *)</span>
 
@@ -79,9 +80,8 @@ interface for polymorphic, limited capacity containers:</p>
 <span class="c">(** [add t x] adds [x] to the container [t], or raises [Full] if</span>
 <span class="c">    [t] has reached its maximum capacity. *)</span>
 
-<span class="k">val</span> <span class="n">remove</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
-<span class="c">(** [remove t x] removes [x] from [t], or raises [Not_found] if</span>
-<span class="c">    [x] is not in [t]. *)</span>
+<span class="k">val</span> <span class="n">mem</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+<span class="c">(** [mem t x] is [true] iff [t] contains [x]. *)</span>
 </pre></div>
 </div>
 <p>Gospel specifications live in special comments, starting with the <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>
@@ -96,7 +96,7 @@ the container directly translates into Gospel:</p>
 <div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span>
 <span class="c">(** The type for containers. *)</span>
 <span class="c">(*@ model capacity: int</span>
-<span class="c">    model contents: &#39;a set *)</span>
+<span class="c">    mutable model contents: &#39;a set *)</span>
 </pre></div>
 </div>
 <p>Notice that documentation comments and Gospel specifications can coexist and
@@ -138,7 +138,7 @@ keyword is <code class="docutils literal notranslate"><span class="pre">ensures<
 <span class="c">    ensures t.contents = Set.empty *)</span>
 </pre></div>
 </div>
-<p>Now on to <code class="docutils literal notranslate"><span class="pre">is_empty</span></code> and <code class="docutils literal notranslate"><span class="pre">clear</span></code>.</p>
+<p>Now on to <code class="docutils literal notranslate"><span class="pre">is_empty</span></code> and <code class="docutils literal notranslate"><span class="pre">mem</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">is_empty</span> <span class="pre">t</span></code> is true if and only if <code class="docutils literal notranslate"><span class="pre">t</span></code> is empty; this is a post-condition.
 This function also (hopefully) has no side-effect: it does not modify <code class="docutils literal notranslate"><span class="pre">t</span></code> and
 does not depend on any internal state. In Gospel’s language, this function is
@@ -149,7 +149,16 @@ does not depend on any internal state. In Gospel’s language, this function is
 <span class="c">    ensures b &lt;-&gt; t.capacity = Set.empty *)</span>
 </pre></div>
 </div>
-<p>Clear removes any element in its argument: it is empty after the call.
+<p>The specification for <code class="docutils literal notranslate"><span class="pre">mem</span></code> is similar:</p>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">mem</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+<span class="c">(*@ b = mem t x</span>
+<span class="c">    pure</span>
+<span class="c">    ensures b &lt;-&gt; Set.mem x t.contents *)</span>
+</pre></div>
+</div>
+<p>Finally, let us specify <code class="docutils literal notranslate"><span class="pre">clear</span></code> and <code class="docutils literal notranslate"><span class="pre">add</span></code>, which are functions
+that mutate the container.</p>
+<p>Function <code class="docutils literal notranslate"><span class="pre">clear</span></code> removes any element in its argument: it is empty after the call.
 Obviously, it modifies the <code class="docutils literal notranslate"><span class="pre">contents</span></code> model of its argument. After its
 execution, the container should be empty. Note that we are only allowed to mention
 <code class="docutils literal notranslate"><span class="pre">is_empty</span></code> in the specification because it is a pure function; attempting
@@ -161,40 +170,30 @@ error.</p>
 <span class="c">    ensures is_empty t *)</span>
 </pre></div>
 </div>
-<p>Finally, let’s specify <code class="docutils literal notranslate"><span class="pre">add</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code>. A first attempt is similar to the
-previous examples. In the following, we use Gospel’s <code class="docutils literal notranslate"><span class="pre">old</span></code> primitive, which
-helps up refer to the state of the container prior to the function execution:</p>
+<p>A first attempt at specifying <code class="docutils literal notranslate"><span class="pre">add</span></code> is similar to the
+previous examples. We use Gospel’s <code class="docutils literal notranslate"><span class="pre">old</span></code> primitive to refer to the
+state of the container prior to the function execution:</p>
 <div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">add</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
 <span class="c">(*@ add t x</span>
 <span class="c">    modifies t.contents</span>
 <span class="c">    ensures t.contents = Set.add x (old t.contents) *)</span>
-
-<span class="k">val</span> <span class="n">remove</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
-<span class="c">(*@ remove t x</span>
-<span class="c">    modifies t.contents</span>
-<span class="c">    ensures t.contents = Set.remove x (old t.contents) *)</span>
 </pre></div>
 </div>
 <p>Notice, however, that this specification is incomplete. Indeed, one specificity
-of those functions is that they can raise exceptions under certain
-circumstances, altering their normal behaviour. Let us complete
+of this function is that it can raise <code class="docutils literal notranslate"><span class="pre">Full</span></code>. Let us complete
 that contract with this bit of information. If <code class="docutils literal notranslate"><span class="pre">add</span></code> raises <code class="docutils literal notranslate"><span class="pre">Full</span></code>, we can
-deduce that <code class="docutils literal notranslate"><span class="pre">t.contents</span></code> already contains <code class="docutils literal notranslate"><span class="pre">t.capacity</span></code> elements. Likewise,
-if <code class="docutils literal notranslate"><span class="pre">remove</span></code> raises <code class="docutils literal notranslate"><span class="pre">Not_found</span></code>, then the element we’re trying to remove was
-not in <code class="docutils literal notranslate"><span class="pre">t.contents</span></code>:</p>
+deduce that <code class="docutils literal notranslate"><span class="pre">t.contents</span></code> already contains <code class="docutils literal notranslate"><span class="pre">t.capacity</span></code> elements.</p>
 <div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span> <span class="k">val</span> <span class="n">add</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
  <span class="c">(*@ add t x</span>
 <span class="c">     modifies t.contents</span>
 <span class="c">     ensures t.contents = Set.add x (old t.contents)</span>
-<span class="hll"><span class="c">     raises Full -&gt; Set.cardinal t.contents = t.capacity *)</span>
-</span>
- <span class="k">val</span> <span class="n">remove</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
- <span class="c">(*@ remove t x</span>
-<span class="c">     modifies t.contents</span>
-<span class="c">     ensures t.contents = Set.remove x (old t.contents)</span>
-<span class="hll"><span class="c">     raises Not_found -&gt; not Set.mem x (old t.contents) *)</span>
+<span class="hll"><span class="c">     raises Full -&gt; Set.cardinal (old t.contents) = t.capacity</span>
+</span><span class="hll"><span class="c">                 /\ t.contents = old t.contents *)</span>
 </span></pre></div>
 </div>
+<p>Since we have a <code class="docutils literal notranslate"><span class="pre">modifies</span></code> clause, the contents of <code class="docutils literal notranslate"><span class="pre">t</span></code> may be
+mutated even when <code class="docutils literal notranslate"><span class="pre">Full</span></code> is raised. The last line of specification
+forbids such a behavior.</p>
 <p>Notice how we did not need to repeat that <code class="docutils literal notranslate"><span class="pre">S.cardinal</span> <span class="pre">t.contents</span> <span class="pre">&lt;=</span>
 <span class="pre">t.capacity</span></code> in every contract; as a type invariant, this property implicitely
 holds in every function’s pre-state and post-state.</p>
@@ -213,14 +212,14 @@ OK
 docstring, which may be incomplete or ambiguous, leading to wrong
 interpretations of your semantics, or wrong usage of your library.</p>
 <p>But besides the <code class="docutils literal notranslate"><span class="pre">gospel</span></code> binary, we also provide a developer API which lets
-other tools leverage these specifications to provide different features. Some
-such tools already exist, and let you benefit from the specification to bring
+other tools leverage these specifications to provide different features.
+Such tools already exist, and let you benefit from the specification to bring
 more guarantees to your programs.</p>
 <span class="target" id="index-0"></span><span class="target" id="index-1"></span><div class="section" id="cameleer">
 <span id="index-2"></span><h3>Cameleer<a class="headerlink" href="#cameleer" title="Permalink to this headline">¶</a></h3>
 <p>Cameleer is a tool for the deductive verification of OCaml code.</p>
 <p>It extents Gospel to implementation files, where you may add logical annotations
-like logical assertions, recursion variants, or loop invariants. The
+like logical assertions, loop invariants, or termination arguments. The
 verification relies on the <a class="reference external" href="https://why3.lri.fr">Why3</a> framework:
 <code class="docutils literal notranslate"><span class="pre">cameleer</span></code> translates the OCaml code into an equivalent WhyML program. It then
 lets you analyse this program whithin the framework (and its IDE!) to prove the
