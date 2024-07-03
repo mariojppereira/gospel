@@ -118,7 +118,7 @@
 %token LRARROW LEFTBRC LEFTBRCCOLON LEFTPAR LEFTBRCRIGHTBRC
 %token LEFTSQ LTGT OR QUESTION RIGHTBRC COLONRIGHTBRC RIGHTPAR RIGHTSQ SEMICOLON
 %token LEFTSQRIGHTSQ
-%token STAR TILDE UNDERSCORE
+%token STAR TILDE UNDERSCORE POINTSTO
 
 (* priorities *)
 
@@ -398,6 +398,8 @@ term_:
     { Tattr ($1, $2) }
 | term cast
     { Tcast ($1, $2) }
+| lqualid POINTSTO LEFTBRC fields = field_list1(term) RIGHTBRC
+    { Tpoints ($1, fields) }
 ;
 
 field_list1(X):

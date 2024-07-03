@@ -207,6 +207,8 @@ rule token = parse
       { COMMA }
   | ";"
       { SEMICOLON }
+  | "~~>"
+      { POINTSTO }
   | "~"
       { TILDE }
   | "?"

@@ -418,6 +418,7 @@ let rec dterm kid crcm ns denv { term_desc; term_loc = loc } : dterm =
         with Not_found -> fun_app ~loc:t.term_loc pj [ t ]
       in
       mk_app ~loc:t.term_loc cs (List.map get_term pjl)
+  | Tpoints _ -> assert false (* TODO *)
 
 let dterm kid crcm ns env t =
   let denv = Mstr.map (fun vs -> dty_of_ty vs.vs_ty) env in

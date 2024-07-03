@@ -75,6 +75,9 @@ and term_desc =
   | Tupdate of term * (qualid * term) list
   | Tscope of qualid * term
   | Told of term
+  (* Separation Logic connectives (wip) *)
+  (* FIXME: refactor the (qualid * term) type *)
+  | Tpoints of qualid * (qualid * term) list
 
 (* Specification *)
 
